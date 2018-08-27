@@ -10,20 +10,20 @@
 #include <math.h>
 
 
-void configurePins(void);							//this function configures the pins of ATMEGA328P that connects to the LCD
-void writeIns(char Ins);							//this function writes Instructions to the LCD
-void checkBF(void);									//this function checks the BusyFlag of the LCD, if the Flag is set, it stays in the loop until the flag is turned off.
-char aquireAC(void);								//this function acquires the current address value in the Address Counter.
-char writeAC(char ACaddress);						//this function writes the address value of the DDRAM or CGRAM to the Address Counter, with a return value of the updated AC value.
+void configurePins(void);					//this function configures the pins of ATMEGA328P that connects to the LCD
+void writeIns(char Ins);					//this function writes Instructions to the LCD
+void checkBF(void);						//this function checks the BusyFlag of the LCD, if the Flag is set, it stays in the loop until the flag is turned off.
+char aquireAC(void);						//this function acquires the current address value in the Address Counter.
+char writeAC(char ACaddress);					//this function writes the address value of the DDRAM or CGRAM to the Address Counter, with a return value of the updated AC value.
 void setEntryMode(char ACoperMode[],char displayShift[]);	//this function sets the entry mode of the LCD, default is AC increment & without display shift.
 void setCursorMode(char cursorON[],char cursorBlink[]);	//this function sets the operation mode of the cursor,default is Cursor ON & Cursor Blink.
 void clearDisplay(void);							//this function clears the entire Display & write 0 to all the DDRAM & set the DDRAM address to 0.
 void returnHome(void);								//this function sets the AC address to 0 without changing the contents of the DDRAM
 void lcdInitiate(void);								//this function initialize the LCD 00111000
 char* lcdPrint(char startingAddress,char* stringData,char* homeBeforePrint);	//this function prints string data to the LCD from the starting address,the starting address can be set to 0 by writing "yes" to the homeBeforePrint parameter.
-void updateEdge(char displacement);					//this function updates the edge DDRAM address of the LCD ,after the display has been shifted.
+void updateEdge(char displacement);						//this function updates the edge DDRAM address of the LCD ,after the display has been shifted.
 void browseLcd(char direction[],char displacement);	// this function is used to browse the LCD by shifting the display with the given direction and displacement
-char screenEdge[]={0X00,0X0F,0X40,0X4F};			//declare a global array to store the address of the screen edge & set the initial screen edge value
+char screenEdge[]={0X00,0X0F,0X40,0X4F};		//declare a global array to store the address of the screen edge & set the initial screen edge value
 
 
 /* Replace with your library code */
@@ -51,7 +51,7 @@ char aquireAC(void)
 	PORTB=0X02;			//set RS,R/W
 	PORTB=0X03;			//set EN
 	_delay_ms(20);
-	AC=PIND &(0X7F);	//get AC value and store it in to the variable AC.
+	AC=PIND &(0X7F);		//get AC value and store it in to the variable AC.
 	PORTB=0X00;			//reset PORTB to initial value
 	PORTD=0X00;			//turn off the internal pullup resistor of PORTD
 	DDRD=0XFF;			//set PORTD to OUTPUT LOW
@@ -95,14 +95,14 @@ char writeAC(char ACaddress)
 {
 	//checkBF();
 	ACaddress=ACaddress|(0X80);	//combine the ACaddress to form the instructions to be sent to LCD
-	writeIns(ACaddress);	//write instructions
+	writeIns(ACaddress);		//write instructions
 	//checkBF(); 
 }
 
 void setEntryMode(char ACoperMode[],char displayShift[])
 {
 	//checkBF();
-	char ins=0X06;	//by default, the entry mode is set to "Increment" & "without display shift"
+	char ins=0X06;		//by default, the entry mode is set to "Increment" & "without display shift"
 	if (ACoperMode=="decrement")
 	{
 		ins=0X04;	//modify the instruction to "decrement"
@@ -111,7 +111,7 @@ void setEntryMode(char ACoperMode[],char displayShift[])
 	{
 		ins=0X05;	//modify the instruction to "with display shift"
 	}
-	writeIns(ins);	//sent instructions to LCD
+	writeIns(ins);		//sent instructions to LCD
 	//checkBF();
 }
 
@@ -165,22 +165,22 @@ char* lcdPrint(char startingAddress,char* stringData,char homeBeforePrint[])
 	else
 	{
 		startingAddress=startingAddress|(0X80);	//combine the AC address value to form the instructions
-		writeIns(startingAddress);				//set DDRAM address
+		writeIns(startingAddress);		//set DDRAM address
 	}
 	while (*(stringData+stringIndex)!=0)
 	{
 		// PORTB2->RS ; PORTB1->RW ; PORTB0->EN 
-		PORTB=0X04;							//set RS,R/W
-		PORTD=*(stringData+stringIndex);	//send character data to LCD
-		PORTB=0X05;							//set EN
-		PORTB=0X04;							//reset RS,RW,EN
-		PORTD=0X00;							//reset Data Bus
+		PORTB=0X04;					//set RS,R/W
+		PORTD=*(stringData+stringIndex);		//send character data to LCD
+		PORTB=0X05;					//set EN
+		PORTB=0X04;					//reset RS,RW,EN
+		PORTD=0X00;					//reset Data Bus
 		/*if (aquireAC()>=*(screenEdge+1))		//warning: this line should be review after the first test 
 		{
-			writeIns(0X18);						//shift the entire Display left by 1
+			writeIns(0X18);				//shift the entire Display left by 1
 			LcdDisplacement=LcdDisplacement+1;	//increment LcdDislplacement by 1
 		}*/
-		stringIndex=stringIndex+1;				//increase stringIndex by 1 
+		stringIndex=stringIndex+1;			//increase stringIndex by 1 
 		_delay_ms(200);
 	}
 	/*blink the onboard LED when string is print completely*/
@@ -234,14 +234,14 @@ void browseLcd(char direction[],char displacement)
 	{
 		if (((displacement<0X28)||(displacement>0XD7)))
 		{
-			if ((displacement&0X80)>>7)				//displacement>0 ->shifting left ; displacement<0 ->shifting right
+			if ((displacement&0X80)>>7)			//displacement>0 ->shifting left ; displacement<0 ->shifting right
 			{
 				displacement=40+displacement;		//shift right in the way of shifting left (ex:shifting right by 2 = shifting left by 38, since there are 40 positions in one row)
 			}
-			//updateEdge(displacement);				//update the screen edge address
+			//updateEdge(displacement);			//update the screen edge address
 			for (int i=0;i<displacement;i++)
 			{
-				writeIns(0X18);						//shift entire screen left by 1
+				writeIns(0X18);				//shift entire screen left by 1
 			}
 			writeAC((aquireAC()+displacement));		//when shifting the entire LCD, the cursor will follow the shifting ; this line shifts the cursor back to its original position			
 		}
